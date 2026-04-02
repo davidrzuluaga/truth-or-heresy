@@ -1,69 +1,36 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useGame } from "../src/context";
 import { HeresyName } from "../src/types";
 
-// ─── Heresy catalogue ─────────────────────────────────────────────────────────
-
-const HERESIES: {
-  name: HeresyName;
-  tagline: string;
-  icon: string;
-  council: string;
-}[] = [
-  {
-    name: "Arianism",
-    tagline: "Jesus is a created, lesser being",
-    icon: "⬇️",
-    council: "Condemned at Nicaea 325 AD",
-  },
-  {
-    name: "Pelagianism",
-    tagline: "Humans can earn salvation by willpower",
-    icon: "💪",
-    council: "Condemned at Carthage 418 AD",
-  },
-  {
-    name: "Gnosticism",
-    tagline: "Secret knowledge saves; matter is evil",
-    icon: "🔮",
-    council: "Opposed by early fathers, 2nd–3rd c.",
-  },
-  {
-    name: "Modalism",
-    tagline: "God wears three masks, not three persons",
-    icon: "🎭",
-    council: "Rejected by 3rd-century church",
-  },
-  {
-    name: "Docetism",
-    tagline: "Jesus only seemed to be human",
-    icon: "👻",
-    council: "Opposed by Ignatius, c. 107 AD",
-  },
-  {
-    name: "Nestorianism",
-    tagline: "Christ is two separate persons",
-    icon: "✌️",
-    council: "Condemned at Ephesus 431 AD",
-  },
-  {
-    name: "Marcionism",
-    tagline: "OT God ≠ NT God; ditch the OT",
-    icon: "⚡",
-    council: "Excommunicated Marcion, 144 AD",
-  },
+const HERESY_KEYS: HeresyName[] = [
+  "Arianism",
+  "Pelagianism",
+  "Gnosticism",
+  "Modalism",
+  "Docetism",
+  "Nestorianism",
+  "Marcionism",
 ];
 
-// ─── Screen ───────────────────────────────────────────────────────────────────
+const HERESY_ICONS: Record<HeresyName, string> = {
+  Arianism: "⬇️",
+  Pelagianism: "💪",
+  Gnosticism: "🔮",
+  Modalism: "🎭",
+  Docetism: "👻",
+  Nestorianism: "✌️",
+  Marcionism: "⚡",
+};
 
 export default function HeresySelectorScreen() {
+  const { t } = useTranslation();
   const { dispatch } = useGame();
 
   const handleSelect = (heresy: HeresyName) => {
     dispatch({ type: "SELECT_HERESY", heresy });
-    // Replace heresy-selector so Back from Explanation goes to Quiz
     router.replace("/explanation");
   };
 
@@ -74,20 +41,18 @@ export default function HeresySelectorScreen() {
         contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header copy */}
         <Text className="text-white text-2xl font-bold mb-1">
-          Name That Heresy!
+          {t("heresySelector.headline")}
         </Text>
         <Text className="text-zinc-400 text-base mb-7 leading-relaxed">
-          Which specific heresy is lurking in this statement?
+          {t("heresySelector.sub")}
         </Text>
 
-        {/* Heresy grid */}
         <View style={{ gap: 12 }}>
-          {HERESIES.map((h) => (
+          {HERESY_KEYS.map((key) => (
             <Pressable
-              key={h.name}
-              onPress={() => handleSelect(h.name)}
+              key={key}
+              onPress={() => handleSelect(key)}
               style={({ pressed }) => ({
                 backgroundColor: pressed ? "#18181b" : "#111113",
                 borderRadius: 16,
@@ -99,7 +64,6 @@ export default function HeresySelectorScreen() {
               })}
             >
               <View className="flex-row items-center" style={{ gap: 14 }}>
-                {/* Icon badge */}
                 <View
                   className="rounded-full items-center justify-center"
                   style={{
@@ -110,17 +74,18 @@ export default function HeresySelectorScreen() {
                     borderColor: "#3f3f46",
                   }}
                 >
-                  <Text style={{ fontSize: 22 }}>{h.icon}</Text>
+                  <Text style={{ fontSize: 22 }}>{HERESY_ICONS[key]}</Text>
                 </View>
 
-                {/* Text */}
                 <View className="flex-1">
                   <Text className="text-white text-lg font-bold mb-0.5">
-                    {h.name}
+                    {t(`heresies.${key}.name`)}
                   </Text>
-                  <Text className="text-zinc-400 text-sm">{h.tagline}</Text>
+                  <Text className="text-zinc-400 text-sm">
+                    {t(`heresies.${key}.tagline`)}
+                  </Text>
                   <Text className="text-zinc-600 text-xs mt-1">
-                    {h.council}
+                    {t(`heresies.${key}.council`)}
                   </Text>
                 </View>
               </View>

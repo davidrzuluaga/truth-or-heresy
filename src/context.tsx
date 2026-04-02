@@ -10,7 +10,7 @@ import {
   GameContextType,
   GameScore,
 } from "./types";
-import { QUESTIONS } from "./questions";
+import { buildQuestions } from "./questions";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ const BLANK_SCORE: GameScore = {
 
 function makeInitialState(): GameState {
   return {
-    questions: shuffle(QUESTIONS),
+    questions: shuffle(buildQuestions()),
     currentIndex: 0,
     score: { ...BLANK_SCORE },
     userChoice: null,
@@ -95,7 +95,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let nextQuestions = state.questions;
       if (nextIndex >= state.questions.length) {
         nextIndex = 0;
-        nextQuestions = shuffle(QUESTIONS);
+        nextQuestions = shuffle(buildQuestions());
       }
       return {
         ...state,

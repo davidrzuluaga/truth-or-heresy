@@ -1,5 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n from "./i18n/config";
 import { Question, HeresyName } from "./types";
+
+function heresyLabel(h: HeresyName): string {
+  return i18n.t(`heresies.${h}.name`);
+}
 
 export const API_KEY_STORAGE_KEY = "@truth_or_heresy_api_key";
 
@@ -30,12 +35,12 @@ function buildPrompt(
 ): string {
   const correctLabel = question.isTruth
     ? "orthodox Christian teaching (Truth)"
-    : `the heresy of ${question.correctHeresy}`;
+    : `the heresy of ${question.correctHeresy ? heresyLabel(question.correctHeresy) : ""}`;
 
   const userLabel =
     userChoice === "truth"
       ? "Truth (orthodox doctrine)"
-      : `Heresy — specifically ${selectedHeresy}`;
+      : `Heresy — specifically ${selectedHeresy ? heresyLabel(selectedHeresy) : ""}`;
 
   const resultLine = isCorrect
     ? `✅ The player got it RIGHT! They correctly identified it as: ${userLabel}.`
@@ -51,11 +56,13 @@ ${resultLine}
 
 Write a SHORT explanation (MAX 160 words, plain text, NO markdown) that:
 1. ${isCorrect ? "Opens with a punchy celebration of their correct answer." : "Opens with a gentle, witty roast of their wrong answer before revealing the truth."}
-2. Explains why this statement is ${question.isTruth ? "solid orthodox teaching" : `the specific heresy of ${question.correctHeresy}`}.
+2. Explains why this statement is ${question.isTruth ? "solid orthodox teaching" : `the specific heresy of ${question.correctHeresy ? heresyLabel(question.correctHeresy) : ""}`}.
 3. Drops one memorable historical note — a council, a heretic's name, a fun fact from church history.
 4. Ends with a single light-hearted tip or fun fact to help them remember for next time.
 
-Keep it punchy, vivid, and under 160 words. Write for a casual Christian who finds theology interesting but hates stuffy textbooks. Plain text only, no bullet points.`;
+Keep it punchy, vivid, and under 160 words. Write for a casual Christian who finds theology interesting but hates stuffy textbooks. Plain text only, no bullet points.
+
+Write your entire response in ${i18n.language.startsWith("es") ? "Spanish" : "English"}.`;
 }
 
 // ─── API call ─────────────────────────────────────────────────────────────────

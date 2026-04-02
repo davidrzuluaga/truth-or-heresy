@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Flame } from "lucide-react-native";
 import { GameScore } from "../src/types";
 
@@ -6,11 +7,8 @@ interface ScoreHeaderProps {
   score: GameScore;
 }
 
-/**
- * Compact score strip shown at the top of the Quiz screen.
- * Shows: Score  |  Accuracy  |  🔥 Streak
- */
 export function ScoreHeader({ score }: ScoreHeaderProps) {
+  const { t } = useTranslation();
   const { correct, attempted, streak } = score;
   const pct =
     attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
@@ -29,27 +27,24 @@ export function ScoreHeader({ score }: ScoreHeaderProps) {
         borderBottomColor: "#1f1f23",
       }}
     >
-      {/* Score */}
       <View className="items-center">
         <Text className="text-amber-400 text-xl font-bold">
           {correct}/{attempted}
         </Text>
-        <Text className="text-zinc-600 text-xs mt-0.5">Score</Text>
+        <Text className="text-zinc-600 text-xs mt-0.5">{t("scoreHeader.score")}</Text>
       </View>
 
-      {/* Divider */}
       <View style={{ width: 1, height: 32, backgroundColor: "#27272a" }} />
 
-      {/* Accuracy */}
       <View className="items-center">
         <Text className="text-amber-400 text-xl font-bold">{pct}%</Text>
-        <Text className="text-zinc-600 text-xs mt-0.5">Accuracy</Text>
+        <Text className="text-zinc-600 text-xs mt-0.5">
+          {t("scoreHeader.accuracy")}
+        </Text>
       </View>
 
-      {/* Divider */}
       <View style={{ width: 1, height: 32, backgroundColor: "#27272a" }} />
 
-      {/* Streak */}
       <View className="items-center">
         <View className="flex-row items-center" style={{ gap: 4 }}>
           <Flame
@@ -64,7 +59,7 @@ export function ScoreHeader({ score }: ScoreHeaderProps) {
             {streak}
           </Text>
         </View>
-        <Text className="text-zinc-600 text-xs mt-0.5">Streak</Text>
+        <Text className="text-zinc-600 text-xs mt-0.5">{t("scoreHeader.streak")}</Text>
       </View>
     </View>
   );
