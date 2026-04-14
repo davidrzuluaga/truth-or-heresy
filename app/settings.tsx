@@ -256,8 +256,8 @@ export default function SettingsScreen() {
           </View>
           <Text className="text-zinc-400 text-sm leading-relaxed">
             Truth or Heresy? tests your knowledge of Christian doctrine across
-            1,200 statements — from the classic heresies condemned by the early
-            church councils to modern pop-theology errors. Features 9 mastery
+            2,055 statements — from the classic heresies condemned by the early
+            church councils to modern pop-theology errors. Features 16 mastery
             paths, daily challenges, spaced repetition, and adaptive difficulty.
           </Text>
           <Text className="text-zinc-600 text-xs mt-4">

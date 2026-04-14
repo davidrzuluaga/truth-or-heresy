@@ -272,14 +272,21 @@ export function checkBadges(
   // Check mastery milestones
   let hasAny50 = false;
   let hasAny100 = false;
+  let completedCount = 0;
+  const pathComplete: Record<string, boolean> = {};
   for (const path of MASTERY_PATHS) {
     const prog = data.masteryProgress[path.id];
     if (prog) {
       const pct = prog.correct / path.totalQuestions;
       if (pct >= 0.5) hasAny50 = true;
-      if (pct >= 1) hasAny100 = true;
+      if (pct >= 1) {
+        hasAny100 = true;
+        pathComplete[path.id] = true;
+        completedCount++;
+      }
     }
   }
+  const allPathsComplete = completedCount === MASTERY_PATHS.length;
 
   const checks: Record<string, boolean> = {
     first_steps: data.totalAnswered >= 10,
@@ -302,6 +309,23 @@ export function checkBadges(
     daily_devotee: data.dailyChallengesCompleted >= 7,
     first_mastery: hasAny50,
     grand_master: hasAny100,
+    // Path-specific mastery badges
+    ot_scholar: pathComplete["old_testament"] === true,
+    nt_scholar: pathComplete["new_testament"] === true,
+    biblical_theologian: pathComplete["biblical_theology"] === true,
+    systematic_theologian: pathComplete["systematic_theology"] === true,
+    church_historian: pathComplete["church_history"] === true,
+    hermeneutics_master: pathComplete["hermeneutics"] === true,
+    pauline_scholar: pathComplete["pauline_theology"] === true,
+    // Thematic combo badges
+    bible_scholar:
+      pathComplete["old_testament"] === true &&
+      pathComplete["new_testament"] === true,
+    deep_theologian:
+      pathComplete["biblical_theology"] === true &&
+      pathComplete["systematic_theology"] === true &&
+      pathComplete["church_history"] === true,
+    whole_counsel: allPathsComplete,
   };
 
   for (const [id, earned] of Object.entries(checks)) {

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -15,7 +16,14 @@ import {
 
 export default function CategorySelectScreen() {
   const { dispatch } = useGame();
-  const { data } = useGamification();
+  const { data, hearts } = useGamification();
+
+  // Redirect to out-of-hearts if no hearts left
+  useEffect(() => {
+    if (hearts <= 0) {
+      router.replace("/out-of-hearts" as any);
+    }
+  }, [hearts]);
   const accuracy =
     data.totalAnswered > 0 ? data.totalCorrect / data.totalAnswered : 0;
 
@@ -102,7 +110,7 @@ export default function CategorySelectScreen() {
               All Questions
             </Text>
             <Text style={{ color: "#a1a1aa", fontSize: 12, marginTop: 2 }}>
-              Random mix from all 1,200 statements
+              Random mix from all 2,055 statements
             </Text>
           </View>
           <ChevronRight size={18} color="#fbbf24" />

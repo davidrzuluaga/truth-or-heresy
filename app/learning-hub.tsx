@@ -14,6 +14,7 @@ import { useGamification } from "../src/gamification/context";
 import { useGame } from "../src/context";
 import { LevelProgress } from "../components/LevelProgress";
 import { StreakCounter } from "../components/StreakCounter";
+import { HeartsDisplay } from "../components/HeartsDisplay";
 import { MasteryCard } from "../components/MasteryCard";
 import { MASTERY_PATHS } from "../src/gamification/mastery";
 import { getDueReviews } from "../src/gamification/spaced";
@@ -24,7 +25,7 @@ import {
 } from "../src/gamification/daily";
 
 export default function LearningHubScreen() {
-  const { data, dueReviewCount, isDailyCompleted } = useGamification();
+  const { data, dueReviewCount, isDailyCompleted, hearts } = useGamification();
   const { dispatch } = useGame();
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
 
@@ -102,6 +103,29 @@ export default function LearningHubScreen() {
           >
             <StreakCounter size="large" />
           </View>
+        </View>
+
+        {/* Hearts display */}
+        <View
+          style={{
+            backgroundColor: "#111113",
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: hearts > 0 ? "#27272a" : "rgba(239,68,68,0.3)",
+            padding: 14,
+            marginBottom: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          <HeartsDisplay hearts={hearts} showCount={true} size="large" />
+          <Text style={{ color: "#71717a", fontSize: 12 }}>
+            {hearts > 0
+              ? "Lose a heart for every wrong answer"
+              : "Hearts refill tomorrow!"}
+          </Text>
         </View>
 
         {/* Quick stats row */}
@@ -263,7 +287,7 @@ export default function LearningHubScreen() {
               Free Play
             </Text>
             <Text style={{ color: "#71717a", fontSize: 12, marginTop: 2 }}>
-              Practice from the full 1,200-question bank
+              Practice from the full 2,055-question bank
             </Text>
           </View>
           <ChevronRight size={18} color="#52525b" />

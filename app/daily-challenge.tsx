@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -7,6 +7,7 @@ import { useGamification } from "../src/gamification/context";
 import { getDailyChallengeQuestions, todayStr } from "../src/gamification/daily";
 import { QuestionCard } from "../components/QuestionCard";
 import { XPNotificationLayer } from "../components/XPNotification";
+import { HeartsDisplay } from "../components/HeartsDisplay";
 import { Confetti } from "../components/Confetti";
 import { Question } from "../src/types";
 import { playCorrect, playWrong, playTap, playLevelUp } from "../src/sound";
@@ -14,12 +15,19 @@ import { playCorrect, playWrong, playTap, playLevelUp } from "../src/sound";
 type Phase = "quiz" | "result" | "complete";
 
 export default function DailyChallengeScreen() {
-  const { recordDailyAnswer, completeDailyChallenge, isDailyCompleted } =
+  const { recordDailyAnswer, completeDailyChallenge, isDailyCompleted, hearts } =
     useGamification();
 
   const questions = useMemo(() => getDailyChallengeQuestions(todayStr()), []);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>(isDailyCompleted ? "complete" : "quiz");
+
+  // Redirect to out-of-hearts if hearts reach 0 during the challenge
+  useEffect(() => {
+    if (hearts <= 0 && phase !== "complete") {
+      router.replace("/out-of-hearts" as any);
+    }
+  }, [hearts, phase]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -315,8 +323,9 @@ export default function DailyChallengeScreen() {
         ))}
       </View>
 
-      {/* Daily badge */}
-      <View style={{ alignItems: "center", marginBottom: 4 }}>
+      {/* Daily badge + hearts */}
+      <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 4 }}>
+        <HeartsDisplay hearts={hearts} showCount={false} size="small" />
         <View
           style={{
             backgroundColor: "rgba(245,158,11,0.15)",

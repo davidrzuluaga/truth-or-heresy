@@ -27,6 +27,7 @@ import {
 } from "./engine";
 import { getDueReviews } from "./spaced";
 import { DAILY_XP_MULTIPLIER, todayStr } from "./daily";
+import { checkHeartsReset, loseHeart } from "./hearts";
 
 // ─── Context shape ──────────────────────────────────────────────────────────
 
@@ -35,6 +36,8 @@ interface GamificationContextType {
   xpNotifications: XPGain[];
   badgeNotifications: BadgeUnlock[];
   levelUp: number | null;
+  /** Current hearts remaining */
+  hearts: number;
   /** Standard quiz answer */
   recordAnswer: (
     wasCorrect: boolean,
@@ -116,6 +119,11 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadGamificationData().then((d) => {
+      // Check if hearts should reset for a new day
+      const resetResult = checkHeartsReset(d.hearts, d.lastHeartReset);
+      if (resetResult.didReset) {
+        d = { ...d, hearts: resetResult.hearts, lastHeartReset: resetResult.lastHeartReset };
+      }
       setData(d);
       loaded.current = true;
     });
@@ -141,9 +149,29 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       questionId?: number
     ) => {
       setData((prev) => {
-        let updated = updateDailyStreak(prev);
-        const xpResult = awardXP(updated, wasCorrect, wasHeresy);
-        updated = xpResult.data;
+        // Check for daily hearts reset first
+        const resetResult = checkHeartsReset(prev.hearts, prev.lastHeartReset);
+        let updated: GamificationData = resetResult.didReset
+          ? { ...prev, hearts: resetResult.hearts, lastHeartReset: resetResult.lastHeartReset }
+          : prev;
+
+        updated = updateDailyStreak(updated);
+
+        let xpGains: XPGain[] = [];
+
+        if (wasCorrect) {
+          // Award XP only on correct answers
+          const xpResult = awardXP(updated, wasCorrect, wasHeresy);
+          updated = xpResult.data;
+          xpGains = xpResult.xpGains;
+        } else {
+          // Wrong answer: 0 XP, lose a heart, still count as answered
+          updated = {
+            ...updated,
+            totalAnswered: updated.totalAnswered + 1,
+            hearts: loseHeart(updated.hearts),
+          };
+        }
 
         if (sessionStreak > updated.bestSessionStreak) {
           updated = { ...updated, bestSessionStreak: sessionStreak };
@@ -160,7 +188,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         }
 
         return processSideEffects(
-          prev, updated, xpResult.xpGains, sessionStreak,
+          prev, updated, xpGains, sessionStreak,
           setLevelUp, setBadgeNotifications, setXPNotifications
         );
       });
@@ -173,15 +201,33 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const recordDailyAnswer = useCallback(
     (wasCorrect: boolean, wasHeresy: boolean, questionId: number) => {
       setData((prev) => {
-        let updated = updateDailyStreak(prev);
-        const xpResult = awardXP(updated, wasCorrect, wasHeresy, DAILY_XP_MULTIPLIER);
-        updated = xpResult.data;
+        // Check for daily hearts reset first
+        const resetResult = checkHeartsReset(prev.hearts, prev.lastHeartReset);
+        let updated: GamificationData = resetResult.didReset
+          ? { ...prev, hearts: resetResult.hearts, lastHeartReset: resetResult.lastHeartReset }
+          : prev;
 
-        // Track daily progress
+        updated = updateDailyStreak(updated);
+
+        let xpGains: XPGain[] = [];
+
         if (wasCorrect) {
+          // Award XP with daily multiplier on correct answers
+          const xpResult = awardXP(updated, wasCorrect, wasHeresy, DAILY_XP_MULTIPLIER);
+          updated = xpResult.data;
+          xpGains = xpResult.xpGains;
+
+          // Track daily progress
           updated = {
             ...updated,
             dailyChallengeProgress: updated.dailyChallengeProgress + 1,
+          };
+        } else {
+          // Wrong answer: 0 XP, lose a heart, still count as answered
+          updated = {
+            ...updated,
+            totalAnswered: updated.totalAnswered + 1,
+            hearts: loseHeart(updated.hearts),
           };
         }
 
@@ -191,7 +237,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         }
 
         return processSideEffects(
-          prev, updated, xpResult.xpGains, 0,
+          prev, updated, xpGains, 0,
           setLevelUp, setBadgeNotifications, setXPNotifications
         );
       });
@@ -246,6 +292,21 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const dueReviewCount = getDueReviews(data.reviewItems).length;
   const isDailyCompleted = data.lastDailyChallengeDate === todayStr();
 
+  // Hearts — apply reset check on every render for live updates
+  const heartsReset = checkHeartsReset(data.hearts, data.lastHeartReset);
+  const hearts = heartsReset.didReset ? heartsReset.hearts : data.hearts;
+
+  // Apply reset if needed (persists to storage via the data effect)
+  useEffect(() => {
+    if (heartsReset.didReset && loaded.current) {
+      setData((prev) => ({
+        ...prev,
+        hearts: heartsReset.hearts,
+        lastHeartReset: heartsReset.lastHeartReset,
+      }));
+    }
+  }, [heartsReset.didReset, heartsReset.lastHeartReset]);
+
   // ── Dismiss helpers ───────────────────────────────────────────────────────
 
   const dismissXP = useCallback((id: string) => {
@@ -267,6 +328,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         xpNotifications,
         badgeNotifications,
         levelUp,
+        hearts,
         recordAnswer,
         recordDailyAnswer,
         recordReviewAnswer,

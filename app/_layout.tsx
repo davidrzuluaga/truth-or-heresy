@@ -82,6 +82,15 @@ export default function RootLayout() {
             />
 
             <Stack.Screen name="settings" options={{ title: "Settings" }} />
+
+            <Stack.Screen
+              name="out-of-hearts"
+              options={{
+                title: "Out of Hearts",
+                headerBackVisible: false,
+                gestureEnabled: false,
+              }}
+            />
           </Stack>
 
           {/* Global overlays */}

@@ -163,6 +163,78 @@ export const BADGES: Badge[] = [
     icon: "🏆",
     category: "mastery",
   },
+  // Path-specific mastery badges
+  {
+    id: "ot_scholar",
+    name: "Old Testament Scholar",
+    description: "Complete the Old Testament Survey",
+    icon: "📜",
+    category: "mastery",
+  },
+  {
+    id: "nt_scholar",
+    name: "New Testament Scholar",
+    description: "Complete the New Testament Survey",
+    icon: "📕",
+    category: "mastery",
+  },
+  {
+    id: "biblical_theologian",
+    name: "Biblical Theologian",
+    description: "Complete Biblical Theology",
+    icon: "🌳",
+    category: "mastery",
+  },
+  {
+    id: "systematic_theologian",
+    name: "Systematic Theologian",
+    description: "Complete Systematic Theology",
+    icon: "🛡️",
+    category: "mastery",
+  },
+  {
+    id: "church_historian",
+    name: "Church Historian",
+    description: "Complete Church History",
+    icon: "🏛️",
+    category: "mastery",
+  },
+  {
+    id: "hermeneutics_master",
+    name: "Hermeneutics Master",
+    description: "Complete Hermeneutics Mastery",
+    icon: "📖",
+    category: "mastery",
+  },
+  {
+    id: "pauline_scholar",
+    name: "Pauline Scholar",
+    description: "Complete Pauline Theology",
+    icon: "✉️",
+    category: "mastery",
+  },
+  // Thematic combo badges
+  {
+    id: "bible_scholar",
+    name: "Bible Scholar",
+    description: "Complete both OT and NT Surveys",
+    icon: "📚",
+    category: "mastery",
+  },
+  {
+    id: "deep_theologian",
+    name: "Deep Theologian",
+    description: "Complete Biblical, Systematic & Church History",
+    icon: "⚜️",
+    category: "mastery",
+  },
+  {
+    id: "whole_counsel",
+    name: "The Whole Counsel",
+    description: "Reach 100% on all mastery paths",
+    icon: "👑",
+    category: "mastery",
+  },
 ];
 
 // ─── Persisted state ────────────────────────────────────────────────────────
@@ -187,6 +259,9 @@ export interface GamificationData {
   reviewsCompleted: number;
   // Mastery Paths — keyed by path ID
   masteryProgress: Record<string, MasteryProgress>;
+  // Hearts / Lives
+  hearts: number;
+  lastHeartReset: string; // YYYY-MM-DD local
 }
 
 export const DEFAULT_DATA: GamificationData = {
@@ -206,6 +281,8 @@ export const DEFAULT_DATA: GamificationData = {
   reviewItems: [],
   reviewsCompleted: 0,
   masteryProgress: {},
+  hearts: 5,
+  lastHeartReset: "",
 };
 
 // ─── Notification types ─────────────────────────────────────────────────────

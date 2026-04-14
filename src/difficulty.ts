@@ -28,7 +28,10 @@ export function getQuestionDifficulty(q: Question): Difficulty {
   if (q.correctHeresy !== null) score += 2;
 
   // Advanced theology categories (later IDs)
-  if (q.id > 1000) score += 2;      // modern heresies
+  if (q.id > 2000) score += 2;      // systematic theology, church history
+  else if (q.id > 1500) score += 2; // OT/NT survey, biblical theology
+  else if (q.id > 1200) score += 2; // hermeneutics, pauline theology
+  else if (q.id > 1000) score += 2; // modern heresies
   else if (q.id > 700) score += 2;  // ecclesiology, grand theology
   else if (q.id > 500) score += 1;  // eschatology, creation & ethics
 

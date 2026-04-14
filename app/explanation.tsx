@@ -20,12 +20,13 @@ import { fetchExplanation, getApiKey } from "../src/claudeApi";
 import { useGamification } from "../src/gamification/context";
 import { XPNotificationLayer } from "../components/XPNotification";
 import { LevelProgress } from "../components/LevelProgress";
+import { HeartsDisplay } from "../components/HeartsDisplay";
 import { playCorrect, playWrong } from "../src/sound";
 import { getQuestionDifficulty, DIFFICULTY_CONFIG } from "../src/difficulty";
 
 export default function ExplanationScreen() {
   const { state, dispatch, currentQuestion } = useGame();
-  const { recordAnswer, data: gData } = useGamification();
+  const { recordAnswer, data: gData, hearts } = useGamification();
 
   const [loading, setLoading] = useState(true);
   const [explanation, setExplanation] = useState<string | null>(null);
@@ -174,6 +175,26 @@ export default function ExplanationScreen() {
               ? `This is the heresy of ${q.correctHeresy}.`
               : "This statement is heretical!"}
           </Text>
+          {!isCorrect && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 10,
+                backgroundColor: "rgba(239,68,68,0.1)",
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 8,
+                alignSelf: "flex-start",
+              }}
+            >
+              <HeartsDisplay hearts={hearts} showCount={true} size="small" pulse={false} />
+              <Text style={{ color: "#f87171", fontSize: 12, fontWeight: "700" }}>
+                -1 Heart
+              </Text>
+            </View>
+          )}
           {!isCorrect && state.userChoice === "heresy" && state.selectedHeresy && state.selectedHeresy !== q?.correctHeresy && (
             <Text className="text-zinc-400 text-sm mt-2">
               You named <Text className="text-red-400 font-semibold">{state.selectedHeresy}</Text> — close,{" "}

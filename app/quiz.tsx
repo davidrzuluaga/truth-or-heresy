@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Stack } from "expo-router";
@@ -8,10 +9,18 @@ import { playTap } from "../src/sound";
 import { ScoreHeader } from "../components/ScoreHeader";
 import { QuestionCard } from "../components/QuestionCard";
 import { LevelProgress } from "../components/LevelProgress";
+import { HeartsDisplay } from "../components/HeartsDisplay";
 
 export default function QuizScreen() {
   const { state, dispatch, currentQuestion } = useGame();
-  const { data: gData } = useGamification();
+  const { data: gData, hearts } = useGamification();
+
+  // Redirect to out-of-hearts when hearts reach 0
+  useEffect(() => {
+    if (hearts <= 0) {
+      router.replace("/out-of-hearts" as any);
+    }
+  }, [hearts]);
 
   if (!currentQuestion) return null;
 
@@ -69,8 +78,13 @@ export default function QuizScreen() {
         }}
       />
 
-      {/* Score strip */}
-      <ScoreHeader score={state.score} />
+      {/* Hearts + Score strip */}
+      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingTop: 6 }}>
+        <HeartsDisplay hearts={hearts} showCount={false} size="small" />
+        <View style={{ flex: 1, marginLeft: 10 }}>
+          <ScoreHeader score={state.score} />
+        </View>
+      </View>
 
       {/* XP progress bar under score */}
       <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 2 }}>

@@ -16,18 +16,28 @@ import { useGame } from "../src/context";
 import { useGamification } from "../src/gamification/context";
 import { StreakCounter } from "../components/StreakCounter";
 import { LevelProgress } from "../components/LevelProgress";
+import { HeartsDisplay } from "../components/HeartsDisplay";
 import { getLevelFromXP } from "../src/gamification/levels";
 import { secondsUntilReset, formatCountdown } from "../src/gamification/daily";
+import {
+  secondsUntilHeartReset,
+  formatHeartCountdown,
+} from "../src/gamification/hearts";
 
 export default function HomeScreen() {
   const { dispatch } = useGame();
-  const { data, dueReviewCount, isDailyCompleted } = useGamification();
+  const { data, dueReviewCount, isDailyCompleted, hearts } = useGamification();
   const level = getLevelFromXP(data.totalXP);
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
+  const [heartCountdown, setHeartCountdown] = useState(
+    formatHeartCountdown(secondsUntilHeartReset())
+  );
+  const outOfHearts = hearts <= 0;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown(formatCountdown(secondsUntilReset()));
+      setHeartCountdown(formatHeartCountdown(secondsUntilHeartReset()));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -35,11 +45,19 @@ export default function HomeScreen() {
   const accuracy = data.totalAnswered > 0 ? data.totalCorrect / data.totalAnswered : 0;
 
   const handleStart = () => {
+    if (outOfHearts) {
+      router.push("/out-of-hearts" as any);
+      return;
+    }
     dispatch({ type: "START_GAME", accuracy, totalAnswered: data.totalAnswered });
     router.push("/quiz");
   };
 
   const handleDaily = () => {
+    if (outOfHearts) {
+      router.push("/out-of-hearts" as any);
+      return;
+    }
     dispatch({ type: "START_GAME", accuracy, totalAnswered: data.totalAnswered });
     router.push("/daily-challenge");
   };
@@ -61,17 +79,20 @@ export default function HomeScreen() {
           paddingTop: 8,
         }}
       >
-        <Pressable
-          onPress={() => router.push("/dashboard")}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.7 : 1,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-          })}
-        >
-          <StreakCounter size="small" />
-        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <HeartsDisplay hearts={hearts} showCount={false} size="small" />
+          <Pressable
+            onPress={() => router.push("/dashboard")}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.7 : 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+            })}
+          >
+            <StreakCounter size="small" />
+          </Pressable>
+        </View>
 
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Pressable
@@ -260,16 +281,43 @@ export default function HomeScreen() {
         {/* Main CTA */}
         <Pressable
           onPress={handleStart}
-          className="bg-amber-500 rounded-2xl w-full py-5 items-center mb-3"
           style={({ pressed }) => ({
+            backgroundColor: outOfHearts ? "#27272a" : "#f59e0b",
+            borderRadius: 16,
+            width: "100%",
+            paddingVertical: 20,
+            alignItems: "center" as const,
+            marginBottom: 12,
+            marginTop: 6,
             opacity: pressed ? 0.88 : 1,
             transform: [{ scale: pressed ? 0.97 : 1 }],
-            marginTop: 6,
           })}
         >
-          <Text className="text-zinc-950 text-xl font-bold tracking-wide">
-            Start Quiz
+          <Text
+            style={{
+              color: outOfHearts ? "#71717a" : "#09090b",
+              fontSize: 20,
+              fontWeight: "700",
+              letterSpacing: 0.5,
+            }}
+          >
+            {outOfHearts ? "Out of Hearts" : "Start Quiz"}
           </Text>
+          {outOfHearts && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                marginTop: 4,
+              }}
+            >
+              <Clock size={12} color="#ef4444" />
+              <Text style={{ color: "#ef4444", fontSize: 12, fontWeight: "600" }}>
+                Refills in {heartCountdown}
+              </Text>
+            </View>
+          )}
         </Pressable>
 
         {/* Learning Hub link */}
@@ -296,7 +344,7 @@ export default function HomeScreen() {
         <View className="flex-row items-center" style={{ gap: 6 }}>
           <BookOpen size={13} color="#52525b" />
           <Text className="text-zinc-600 text-xs">
-            1,200 statements · Powered by the councils
+            2,055 statements · Powered by the councils
           </Text>
         </View>
       </View>
