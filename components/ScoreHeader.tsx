@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text } from "react-native";
 import { Flame } from "lucide-react-native";
 import { GameScore } from "../src/types";
@@ -10,7 +11,7 @@ interface ScoreHeaderProps {
  * Compact score strip shown at the top of the Quiz screen.
  * Shows: Score  |  Accuracy  |  🔥 Streak
  */
-export function ScoreHeader({ score }: ScoreHeaderProps) {
+export const ScoreHeader = memo(function ScoreHeader({ score }: ScoreHeaderProps) {
   const { correct, attempted, streak } = score;
   const pct =
     attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
@@ -68,4 +69,4 @@ export function ScoreHeader({ score }: ScoreHeaderProps) {
       </View>
     </View>
   );
-}
+});

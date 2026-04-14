@@ -72,12 +72,13 @@ export default function DailyChallengeScreen() {
     return (
       <SafeAreaView className="flex-1 bg-zinc-950" edges={["bottom"]}>
         <Confetti active={showConfetti} onDone={() => setShowConfetti(false)} />
-        <View
-          style={{
-            flex: 1,
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
             justifyContent: "center",
             alignItems: "center",
             paddingHorizontal: 32,
+            paddingVertical: 40,
           }}
         >
           <View
@@ -149,7 +150,7 @@ export default function DailyChallengeScreen() {
               Done
             </Text>
           </Pressable>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }

@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   View,
   Text,
   Pressable,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -12,11 +11,8 @@ import {
   CheckCircle,
   XCircle,
   ChevronRight,
-  AlertTriangle,
-  ExternalLink,
 } from "lucide-react-native";
 import { useGame } from "../src/context";
-import { fetchExplanation, getApiKey } from "../src/claudeApi";
 import { useGamification } from "../src/gamification/context";
 import { XPNotificationLayer } from "../components/XPNotification";
 import { LevelProgress } from "../components/LevelProgress";
@@ -28,13 +24,7 @@ export default function ExplanationScreen() {
   const { state, dispatch, currentQuestion } = useGame();
   const { recordAnswer, data: gData, hearts } = useGamification();
 
-  const [loading, setLoading] = useState(true);
-  const [explanation, setExplanation] = useState<string | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
   const recorded = useRef(false);
-
-  // Abort the fetch if the user navigates away before it finishes.
-  const abortRef = useRef<AbortController | null>(null);
 
   // Record XP for this answer (once) + play sound
   useEffect(() => {
@@ -59,64 +49,7 @@ export default function ExplanationScreen() {
     }
   }, [state.isCorrect]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    loadExplanation(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const loadExplanation = async (signal: AbortSignal) => {
-    if (!currentQuestion || state.isCorrect === null || !state.userChoice)
-      return;
-
-    // Use the built-in explanation if available.
-    if (currentQuestion.explanation) {
-      setExplanation(currentQuestion.explanation);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setApiError(null);
-
-    try {
-      const apiKey = await getApiKey();
-      if (!apiKey) {
-        if (!signal.aborted) {
-          setApiError(
-            "No API key found. Tap below to add your Anthropic key in Settings."
-          );
-          setLoading(false);
-        }
-        return;
-      }
-
-      const text = await fetchExplanation(
-        currentQuestion,
-        state.isCorrect,
-        state.userChoice,
-        state.selectedHeresy,
-        apiKey,
-        signal
-      );
-
-      if (!signal.aborted) {
-        setExplanation(text);
-        setLoading(false);
-      }
-    } catch (err: unknown) {
-      if (!signal.aborted) {
-        const msg =
-          err instanceof Error ? err.message : "Something went wrong.";
-        setApiError(msg);
-        setLoading(false);
-      }
-    }
-  };
-
   const handleNext = () => {
-    abortRef.current?.abort();
     dispatch({ type: "NEXT_QUESTION" });
     router.navigate("/quiz");
   };
@@ -256,40 +189,9 @@ export default function ExplanationScreen() {
             The Council Weighs In
           </Text>
 
-          {loading ? (
-            <View className="items-center py-8" style={{ gap: 14 }}>
-              <ActivityIndicator size="large" color="#f59e0b" />
-              <Text className="text-zinc-400 text-base text-center">
-                Consulting the ancient councils…
-              </Text>
-            </View>
-          ) : apiError ? (
-            <View style={{ gap: 10 }}>
-              <View className="flex-row items-center" style={{ gap: 8 }}>
-                <AlertTriangle size={18} color="#fbbf24" />
-                <Text className="text-amber-400 text-sm font-semibold">
-                  Explanation unavailable
-                </Text>
-              </View>
-              <Text className="text-zinc-400 text-sm leading-relaxed">
-                {apiError}
-              </Text>
-              <Pressable
-                onPress={() => router.push("/settings")}
-                className="flex-row items-center mt-1"
-                style={{ gap: 4 }}
-              >
-                <ExternalLink size={14} color="#f59e0b" />
-                <Text className="text-amber-400 text-sm">
-                  Go to Settings
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Text className="text-zinc-200 text-base leading-relaxed">
-              {explanation}
-            </Text>
-          )}
+          <Text className="text-zinc-200 text-base leading-relaxed">
+            {q?.explanation}
+          </Text>
         </View>
 
         {/* ── Score snapshot + XP bar ────────────────────────────────────── */}

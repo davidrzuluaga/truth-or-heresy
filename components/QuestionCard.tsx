@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text } from "react-native";
 
 interface QuestionCardProps {
@@ -9,7 +10,7 @@ interface QuestionCardProps {
  * The big dramatic card that shows the theological statement.
  * Designed to feel like a parchment from the council archives.
  */
-export function QuestionCard({ statement, questionNumber }: QuestionCardProps) {
+export const QuestionCard = memo(function QuestionCard({ statement, questionNumber }: QuestionCardProps) {
   return (
     <View
       style={{
@@ -87,4 +88,4 @@ export function QuestionCard({ statement, questionNumber }: QuestionCardProps) {
       </Text>
     </View>
   );
-}
+});

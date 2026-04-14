@@ -53,7 +53,7 @@ export default function QuizScreen() {
           headerRight: () => (
             <View className="flex-row items-center" style={{ gap: 18 }}>
               <Pressable
-                onPress={() => router.push("/dashboard")}
+                onPress={() => router.push("/learning-hub")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
                 hitSlop={8}
               >

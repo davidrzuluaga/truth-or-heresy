@@ -49,11 +49,6 @@ export default function RootLayout() {
             <Stack.Screen name="summary" options={{ headerShown: false }} />
 
             <Stack.Screen
-              name="dashboard"
-              options={{ title: "Your Progress" }}
-            />
-
-            <Stack.Screen
               name="learning-hub"
               options={{ title: "Learning Hub" }}
             />

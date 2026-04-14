@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { View, Text } from "react-native";
 import { BADGES, Badge } from "../src/gamification/types";
 
@@ -8,8 +9,8 @@ interface BadgeGridProps {
 /**
  * Beautiful grid of all badges with locked/unlocked states.
  */
-export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
-  const unlocked = new Set(unlockedBadges);
+export const BadgeGrid = memo(function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
+  const unlocked = useMemo(() => new Set(unlockedBadges), [unlockedBadges]);
 
   return (
     <View>
@@ -41,9 +42,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
       </View>
     </View>
   );
-}
+});
 
-function BadgeCard({
+const BadgeCard = memo(function BadgeCard({
   badge,
   isUnlocked,
 }: {
@@ -116,4 +117,4 @@ function BadgeCard({
       </Text>
     </View>
   );
-}
+});

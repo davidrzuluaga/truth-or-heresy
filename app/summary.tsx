@@ -261,7 +261,7 @@ export default function SummaryScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => router.push("/dashboard")}
+            onPress={() => router.push("/learning-hub")}
             className="flex-row items-center py-3"
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, gap: 6 })}
           >

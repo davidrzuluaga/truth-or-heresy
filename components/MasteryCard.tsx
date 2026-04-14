@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text } from "react-native";
 import { MasteryPath, getMasteryMilestone, MasteryProgress } from "../src/gamification/mastery";
 
@@ -6,7 +7,7 @@ interface MasteryCardProps {
   progress: MasteryProgress | undefined;
 }
 
-export function MasteryCard({ path, progress }: MasteryCardProps) {
+export const MasteryCard = memo(function MasteryCard({ path, progress }: MasteryCardProps) {
   const correct = progress?.correct ?? 0;
   const total = path.totalQuestions;
   const pct = total > 0 ? correct / total : 0;
@@ -101,4 +102,4 @@ export function MasteryCard({ path, progress }: MasteryCardProps) {
       </Text>
     </View>
   );
-}
+});
