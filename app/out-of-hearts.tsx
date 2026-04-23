@@ -13,15 +13,15 @@ import { HeartsDisplay } from "../components/HeartsDisplay";
 export default function OutOfHeartsScreen() {
   const { data, dueReviewCount } = useGamification();
   const [countdown, setCountdown] = useState(
-    formatHeartCountdown(secondsUntilHeartReset())
+    formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset))
   );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCountdown(formatHeartCountdown(secondsUntilHeartReset()));
+      setCountdown(formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset)));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [data.lastHeartReset]);
 
   // If hearts restored (e.g. via reset), go back automatically
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function OutOfHeartsScreen() {
             textAlign: "center",
           }}
         >
-          Come back{"\n"}tomorrow!
+          Out of Hearts!
         </Text>
 
         <Text
@@ -109,8 +109,7 @@ export default function OutOfHeartsScreen() {
             marginBottom: 8,
           }}
         >
-          You've used all your hearts for today.{"\n"}
-          Hearts refill every day at midnight.
+          Your hearts will refill{"\n"}24 hours after you ran out.
         </Text>
 
         {/* Countdown */}

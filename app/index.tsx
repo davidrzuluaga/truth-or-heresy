@@ -29,17 +29,17 @@ export default function HomeScreen() {
   const level = getLevelFromXP(data.totalXP);
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
   const [heartCountdown, setHeartCountdown] = useState(
-    formatHeartCountdown(secondsUntilHeartReset())
+    formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset))
   );
   const outOfHearts = hearts <= 0;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown(formatCountdown(secondsUntilReset()));
-      setHeartCountdown(formatHeartCountdown(secondsUntilHeartReset()));
+      setHeartCountdown(formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset)));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [data.lastHeartReset]);
 
   const accuracy =
     data.totalAnswered > 0 ? data.totalCorrect / data.totalAnswered : 0;

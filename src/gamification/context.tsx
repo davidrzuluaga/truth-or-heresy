@@ -27,7 +27,8 @@ import {
 } from "./engine";
 import { getDueReviews } from "./spaced";
 import { DAILY_XP_MULTIPLIER, todayStr } from "./daily";
-import { checkHeartsReset, loseHeart } from "./hearts";
+import { checkHeartsReset, loseHeart, MAX_HEARTS } from "./hearts";
+import { usePremium } from "../premium";
 
 // ─── Context shape ──────────────────────────────────────────────────────────
 
@@ -111,11 +112,14 @@ function processSideEffects(
 // ─── Provider ───────────────────────────────────────────────────────────────
 
 export function GamificationProvider({ children }: { children: ReactNode }) {
+  const { isPremium } = usePremium();
   const [data, setData] = useState<GamificationData>({ ...DEFAULT_DATA });
   const [xpNotifications, setXPNotifications] = useState<XPGain[]>([]);
   const [badgeNotifications, setBadgeNotifications] = useState<BadgeUnlock[]>([]);
   const [levelUp, setLevelUp] = useState<number | null>(null);
   const loaded = useRef(false);
+  const premiumRef = useRef(isPremium);
+  useEffect(() => { premiumRef.current = isPremium; }, [isPremium]);
 
   useEffect(() => {
     loadGamificationData().then((d) => {
@@ -165,11 +169,16 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           updated = xpResult.data;
           xpGains = xpResult.xpGains;
         } else {
-          // Wrong answer: 0 XP, lose a heart, still count as answered
+          // Wrong answer: 0 XP, lose a heart (unless premium), still count as answered
+          const newHearts = premiumRef.current
+            ? updated.hearts
+            : loseHeart(updated.hearts);
           updated = {
             ...updated,
             totalAnswered: updated.totalAnswered + 1,
-            hearts: loseHeart(updated.hearts),
+            hearts: newHearts,
+            // Stamp the time when the last heart is lost so we can refill after 24h
+            ...(newHearts === 0 ? { lastHeartReset: new Date().toISOString() } : {}),
           };
         }
 
@@ -223,11 +232,15 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
             dailyChallengeProgress: updated.dailyChallengeProgress + 1,
           };
         } else {
-          // Wrong answer: 0 XP, lose a heart, still count as answered
+          // Wrong answer: 0 XP, lose a heart (unless premium), still count as answered
+          const newHearts = premiumRef.current
+            ? updated.hearts
+            : loseHeart(updated.hearts);
           updated = {
             ...updated,
             totalAnswered: updated.totalAnswered + 1,
-            hearts: loseHeart(updated.hearts),
+            hearts: newHearts,
+            ...(newHearts === 0 ? { lastHeartReset: new Date().toISOString() } : {}),
           };
         }
 
@@ -292,9 +305,14 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const dueReviewCount = getDueReviews(data.reviewItems).length;
   const isDailyCompleted = data.lastDailyChallengeDate === todayStr();
 
-  // Hearts — apply reset check on every render for live updates
+  // Hearts — apply reset check on every render for live updates.
+  // Premium users always show full hearts.
   const heartsReset = checkHeartsReset(data.hearts, data.lastHeartReset);
-  const hearts = heartsReset.didReset ? heartsReset.hearts : data.hearts;
+  const hearts = isPremium
+    ? MAX_HEARTS
+    : heartsReset.didReset
+    ? heartsReset.hearts
+    : data.hearts;
 
   // Apply reset if needed (persists to storage via the data effect)
   useEffect(() => {

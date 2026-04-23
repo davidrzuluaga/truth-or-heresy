@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Info, Volume2, VolumeX } from "lucide-react-native";
+import { Info, Volume2, VolumeX, Crown, Check } from "lucide-react-native";
+import { router } from "expo-router";
 import { isSoundEnabled, setSoundEnabled } from "../src/sound";
+import { usePremium } from "../src/premium";
 
 export default function SettingsScreen() {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
+  const { isPremium } = usePremium();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }} edges={["bottom"]}>
@@ -14,6 +17,43 @@ export default function SettingsScreen() {
         contentContainerStyle={{ paddingVertical: 24 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Premium ──────────────────────────────────────────── */}
+        <Pressable
+          onPress={() => router.push("/paywall" as any)}
+          style={({ pressed }) => ({
+            backgroundColor: isPremium ? "rgba(74,222,128,0.08)" : "rgba(245,158,11,0.1)",
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: isPremium ? "rgba(74,222,128,0.25)" : "rgba(245,158,11,0.3)",
+            padding: 20,
+            marginBottom: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            opacity: pressed ? 0.85 : 1,
+          })}
+        >
+          <View
+            style={{
+              backgroundColor: isPremium ? "rgba(74,222,128,0.15)" : "rgba(245,158,11,0.15)",
+              borderRadius: 9999,
+              padding: 8,
+              marginRight: 12,
+            }}
+          >
+            {isPremium ? <Check size={20} color="#4ade80" /> : <Crown size={20} color="#f59e0b" />}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "700" }}>
+              {isPremium ? "Premium Unlocked" : "Go Premium"}
+            </Text>
+            <Text style={{ color: "#a1a1aa", fontSize: 12, marginTop: 2 }}>
+              {isPremium
+                ? "Infinite hearts · All paths unlocked"
+                : "Infinite hearts · 11 more mastery paths"}
+            </Text>
+          </View>
+        </Pressable>
+
         {/* ── Sound toggle ──────────────────────────────────────── */}
         <View
           style={{

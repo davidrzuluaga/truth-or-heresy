@@ -8,9 +8,11 @@ import {
   RotateCcw,
   ChevronRight,
   Sparkles,
+  Crown,
 } from "lucide-react-native";
 import { useGamification } from "../src/gamification/context";
 import { useGame } from "../src/context";
+import { usePremium } from "../src/premium";
 import { LevelProgress } from "../components/LevelProgress";
 import { StreakCounter } from "../components/StreakCounter";
 import { HeartsDisplay } from "../components/HeartsDisplay";
@@ -25,6 +27,10 @@ import {
 export default function LearningHubScreen() {
   const { data, dueReviewCount, isDailyCompleted, hearts } = useGamification();
   const { dispatch } = useGame();
+  const { isPremium } = usePremium();
+
+  const freePaths = MASTERY_PATHS.filter((p) => p.isFree);
+  const paidPaths = MASTERY_PATHS.filter((p) => !p.isFree);
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
 
   useEffect(() => {
@@ -241,11 +247,52 @@ export default function LearningHubScreen() {
 
         {/* ── Mastery Paths ────────────────────────────────────── */}
         <Text style={styles.sectionTitle}>Mastery Paths</Text>
-        {MASTERY_PATHS.map((path) => (
+        {freePaths.map((path) => (
           <MasteryCard
             key={path.id}
             path={path}
             progress={data.masteryProgress[path.id]}
+          />
+        ))}
+
+        {/* Unlock CTA (hidden once user is premium) */}
+        {!isPremium && paidPaths.length > 0 && (
+          <Pressable
+            onPress={() => router.push("/paywall" as any)}
+            style={({ pressed }) => ({
+              backgroundColor: "rgba(245,158,11,0.12)",
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: "rgba(245,158,11,0.35)",
+              padding: 16,
+              marginTop: 8,
+              marginBottom: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
+            <Crown size={22} color="#f59e0b" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "#fbbf24", fontSize: 15, fontWeight: "800" }}>
+                Unlock {paidPaths.length} More Paths
+              </Text>
+              <Text style={{ color: "#a1a1aa", fontSize: 12, marginTop: 2 }}>
+                Infinite hearts · Full scholar library
+              </Text>
+            </View>
+            <ChevronRight size={18} color="#f59e0b" />
+          </Pressable>
+        )}
+
+        {/* Premium (or locked) paths */}
+        {paidPaths.map((path) => (
+          <MasteryCard
+            key={path.id}
+            path={path}
+            progress={data.masteryProgress[path.id]}
+            locked={!isPremium}
           />
         ))}
 

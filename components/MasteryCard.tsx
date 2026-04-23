@@ -1,13 +1,16 @@
 import { memo } from "react";
 import { View, Text } from "react-native";
+import { Lock } from "lucide-react-native";
 import { MasteryPath, getMasteryMilestone, MasteryProgress } from "../src/gamification/mastery";
 
 interface MasteryCardProps {
   path: MasteryPath;
   progress: MasteryProgress | undefined;
+  /** If true, render with a locked/paywall visual (no progress shown). */
+  locked?: boolean;
 }
 
-export const MasteryCard = memo(function MasteryCard({ path, progress }: MasteryCardProps) {
+export const MasteryCard = memo(function MasteryCard({ path, progress, locked = false }: MasteryCardProps) {
   const correct = progress?.correct ?? 0;
   const total = path.totalQuestions;
   const pct = total > 0 ? correct / total : 0;
@@ -16,12 +19,17 @@ export const MasteryCard = memo(function MasteryCard({ path, progress }: Mastery
   return (
     <View
       style={{
-        backgroundColor: "#111113",
+        backgroundColor: locked ? "#0a0a0c" : "#111113",
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: label ? "rgba(245,158,11,0.3)" : "#27272a",
+        borderColor: locked
+          ? "#1f1f23"
+          : label
+          ? "rgba(245,158,11,0.3)"
+          : "#27272a",
         padding: 16,
         marginBottom: 10,
+        opacity: locked ? 0.55 : 1,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
@@ -66,13 +74,17 @@ export const MasteryCard = memo(function MasteryCard({ path, progress }: Mastery
           </Text>
         </View>
 
-        <Text style={{ color: "#a1a1aa", fontSize: 13, fontWeight: "600" }}>
-          {correct}/{total}
-        </Text>
+        {locked ? (
+          <Lock size={16} color="#71717a" />
+        ) : (
+          <Text style={{ color: "#a1a1aa", fontSize: 13, fontWeight: "600" }}>
+            {correct}/{total}
+          </Text>
+        )}
       </View>
 
-      {/* Progress bar */}
-      <View
+      {/* Progress bar (hidden when locked) */}
+      {!locked && <View
         style={{
           height: 6,
           borderRadius: 3,
@@ -95,11 +107,11 @@ export const MasteryCard = memo(function MasteryCard({ path, progress }: Mastery
             width: `${Math.max(pct * 100, pct > 0 ? 2 : 0)}%` as any,
           }}
         />
-      </View>
+      </View>}
 
-      <Text style={{ color: "#52525b", fontSize: 10, marginTop: 4, textAlign: "right" }}>
+      {!locked && <Text style={{ color: "#52525b", fontSize: 10, marginTop: 4, textAlign: "right" }}>
         {Math.round(pct * 100)}%
-      </Text>
+      </Text>}
     </View>
   );
 });

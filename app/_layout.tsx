@@ -5,14 +5,16 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GameProvider } from "../src/context";
 import { GamificationProvider } from "../src/gamification/context";
+import { PremiumProvider } from "../src/premium";
 import { LevelUpModal } from "../components/LevelUpModal";
 import { BadgeUnlockModal } from "../components/BadgeUnlockModal";
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <GameProvider>
-        <GamificationProvider>
+      <PremiumProvider>
+        <GameProvider>
+          <GamificationProvider>
           <StatusBar style="light" />
           <Stack
             screenOptions={{
@@ -79,6 +81,11 @@ export default function RootLayout() {
             <Stack.Screen name="settings" options={{ title: "Settings" }} />
 
             <Stack.Screen
+              name="paywall"
+              options={{ title: "Premium", presentation: "modal" }}
+            />
+
+            <Stack.Screen
               name="out-of-hearts"
               options={{
                 title: "Out of Hearts",
@@ -91,8 +98,9 @@ export default function RootLayout() {
           {/* Global overlays */}
           <LevelUpModal />
           <BadgeUnlockModal />
-        </GamificationProvider>
-      </GameProvider>
+          </GamificationProvider>
+        </GameProvider>
+      </PremiumProvider>
     </SafeAreaProvider>
   );
 }

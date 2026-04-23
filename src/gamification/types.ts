@@ -261,7 +261,7 @@ export interface GamificationData {
   masteryProgress: Record<string, MasteryProgress>;
   // Hearts / Lives
   hearts: number;
-  lastHeartReset: string; // YYYY-MM-DD local
+  lastHeartReset: string; // ISO timestamp when hearts hit 0; "" when hearts are available
 }
 
 export const DEFAULT_DATA: GamificationData = {

@@ -11,6 +11,8 @@ export interface MasteryPath {
   questionRange: [number, number];
   /** Total questions in this path */
   totalQuestions: number;
+  /** If true, this path is available to free users. Otherwise it's premium-only. */
+  isFree?: boolean;
 }
 
 export const MASTERY_PATHS: MasteryPath[] = [
@@ -21,6 +23,7 @@ export const MASTERY_PATHS: MasteryPath[] = [
     icon: "🔺",
     questionRange: [1, 70],
     totalQuestions: 70,
+    isFree: true,
   },
   {
     id: "theology_proper",
@@ -37,6 +40,7 @@ export const MASTERY_PATHS: MasteryPath[] = [
     icon: "✝️",
     questionRange: [151, 350],
     totalQuestions: 200,
+    isFree: true,
   },
   {
     id: "soteriology",
@@ -45,6 +49,7 @@ export const MASTERY_PATHS: MasteryPath[] = [
     icon: "🕊️",
     questionRange: [351, 500],
     totalQuestions: 150,
+    isFree: true,
   },
   {
     id: "eschatology",
@@ -69,6 +74,7 @@ export const MASTERY_PATHS: MasteryPath[] = [
     icon: "⛪",
     questionRange: [701, 850],
     totalQuestions: 150,
+    isFree: true,
   },
   {
     id: "integration",
@@ -85,6 +91,7 @@ export const MASTERY_PATHS: MasteryPath[] = [
     icon: "📱",
     questionRange: [1001, 1200],
     totalQuestions: 200,
+    isFree: true,
   },
   {
     id: "hermeneutics",

@@ -1,9 +1,10 @@
 /**
  * Hearts / Lives system.
  *
- * Players get 5 hearts per day. Lose 1 for every wrong answer.
- * When hearts reach 0, the player can't play quiz or daily challenge
- * (review mode is always free). Hearts reset daily at midnight local time.
+ * Players get 5 hearts. Lose 1 for every wrong answer.
+ * When hearts reach 0 the player can't play quiz or daily challenge
+ * (review mode is always free). Hearts refill 24 hours after the last
+ * heart was lost.
  */
 
 // ── Constants ───────────────────────────────────────────────────────────────
@@ -12,25 +13,23 @@ export const MAX_HEARTS = 5;
 
 // ── Reset logic ─────────────────────────────────────────────────────────────
 
-/**
- * Get today's date string in YYYY-MM-DD (local time).
- */
-function todayLocal(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const REFILL_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 /**
  * Check if hearts should reset and return the updated values.
- * Hearts reset when the stored date differs from today (local).
+ * Hearts reset 24 hours after lastHeartReset (an ISO timestamp set when
+ * hearts hit 0). If hearts > 0 or no timestamp is recorded, no reset.
  */
 export function checkHeartsReset(
   hearts: number,
   lastHeartReset: string
 ): { hearts: number; lastHeartReset: string; didReset: boolean } {
-  const today = todayLocal();
-  if (lastHeartReset !== today) {
-    return { hearts: MAX_HEARTS, lastHeartReset: today, didReset: true };
+  if (hearts > 0 || !lastHeartReset) {
+    return { hearts, lastHeartReset, didReset: false };
+  }
+  const elapsed = Date.now() - new Date(lastHeartReset).getTime();
+  if (elapsed >= REFILL_MS) {
+    return { hearts: MAX_HEARTS, lastHeartReset: "", didReset: true };
   }
   return { hearts, lastHeartReset, didReset: false };
 }
@@ -43,17 +42,17 @@ export function loseHeart(hearts: number): number {
 }
 
 /**
- * Seconds until midnight (local time) — for the countdown timer.
+ * Seconds until hearts refill (24h after lastHeartReset timestamp).
+ * Pass the stored lastHeartReset ISO string from gamification data.
  */
-export function secondsUntilHeartReset(): number {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+export function secondsUntilHeartReset(lastHeartReset: string): number {
+  if (!lastHeartReset) return REFILL_MS / 1000;
+  const refillAt = new Date(lastHeartReset).getTime() + REFILL_MS;
+  return Math.max(0, Math.floor((refillAt - Date.now()) / 1000));
 }
 
 /**
- * Format seconds as HH:MM:SS or MM:SS.
+ * Format seconds as "Xh MMm" or "Mm SSs".
  */
 export function formatHeartCountdown(seconds: number): string {
   const h = Math.floor(seconds / 3600);
