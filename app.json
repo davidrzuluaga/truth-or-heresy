@@ -5,23 +5,37 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "scheme": "truthorheresy",
+    "newArchEnabled": true,
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#09090b"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.truthorheresy.app"
+      "bundleIdentifier": "com.truthorheresy.app",
+      "buildNumber": "1",
+      "requireFullScreen": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": []
+      }
     },
     "android": {
+      "package": "com.truthorheresy.app",
+      "versionCode": 1,
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#09090b"
       },
-      "package": "com.truthorheresy.app"
+      "permissions": []
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
@@ -29,6 +43,10 @@
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "truthorheresy"
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
   }
 }

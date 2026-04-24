@@ -73,6 +73,18 @@ export const PREMIUM_ENTITLEMENT = "premium";
 /** Offering identifier configured in the RevenueCat dashboard. */
 export const DEFAULT_OFFERING = "default";
 
+/**
+ * Store product IDs. Use the SAME string on both platforms so
+ * RevenueCat / App Store Connect / Play Console stay in lockstep.
+ *
+ *   - App Store Connect → In-App Purchases → Non-Consumable
+ *   - Play Console → Monetize → Products → In-app products (one-time)
+ *   - RevenueCat → Products → add both, attach to "premium" entitlement
+ */
+export const PRODUCT_IDS = {
+  premiumUnlock: "com.truthorheresy.app.premium.unlock",
+} as const;
+
 let initialized = false;
 const listeners = new Set<CustomerInfoListener>();
 
