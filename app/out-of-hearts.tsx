@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { Heart, RotateCcw, Clock } from "lucide-react-native";
+import { Heart, RotateCcw, Clock, Crown, Infinity as InfinityIcon } from "lucide-react-native";
 import { useGamification } from "../src/gamification/context";
+import { usePremium } from "../src/premium";
 import {
   secondsUntilHeartReset,
   formatHeartCountdown,
@@ -12,6 +13,7 @@ import { HeartsDisplay } from "../components/HeartsDisplay";
 
 export default function OutOfHeartsScreen() {
   const { data, dueReviewCount } = useGamification();
+  const { isPremium } = usePremium();
   const [countdown, setCountdown] = useState(
     formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset))
   );
@@ -133,6 +135,62 @@ export default function OutOfHeartsScreen() {
           </Text>
           <Text style={{ color: "#71717a", fontSize: 13 }}>until reset</Text>
         </View>
+
+        {/* Premium CTA — hearts-exhausted is the highest-intent upsell moment */}
+        {!isPremium && (
+          <Pressable
+            onPress={() => router.push("/paywall" as any)}
+            style={({ pressed }) => ({
+              backgroundColor: "#f59e0b",
+              borderRadius: 16,
+              paddingVertical: 16,
+              paddingHorizontal: 24,
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 12,
+              shadowColor: "#f59e0b",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 12,
+            })}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(28,25,23,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <InfinityIcon size={20} color="#1c1917" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Crown size={14} color="#1c1917" />
+                <Text
+                  style={{ color: "#1c1917", fontSize: 16, fontWeight: "900" }}
+                >
+                  Never Run Out Again
+                </Text>
+              </View>
+              <Text
+                style={{
+                  color: "rgba(28,25,23,0.75)",
+                  fontSize: 12,
+                  marginTop: 2,
+                  fontWeight: "600",
+                }}
+              >
+                Infinite hearts + 11 more paths · $4.99 once
+              </Text>
+            </View>
+          </Pressable>
+        )}
 
         {/* Review option */}
         {dueReviewCount > 0 && (
