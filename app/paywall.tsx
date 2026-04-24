@@ -1,9 +1,10 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Crown, Heart, BookOpen, Infinity as InfinityIcon, Check } from "lucide-react-native";
 import { usePremium } from "../src/premium";
 import { MASTERY_PATHS } from "../src/gamification/mastery";
+import { restorePurchases } from "../src/revenuecat";
 
 const PERKS = [
   { icon: InfinityIcon, title: "Infinite Hearts", blurb: "Never stop studying — play as much as you want." },
@@ -13,8 +14,11 @@ const PERKS = [
 
 export default function PaywallScreen() {
   const { isPremium, setPremium } = usePremium();
+  const { from, pathId } = useLocalSearchParams<{ from?: string; pathId?: string }>();
   const paidCount = MASTERY_PATHS.filter((p) => !p.isFree).length;
   const totalQuestions = MASTERY_PATHS.filter((p) => !p.isFree).reduce((n, p) => n + p.totalQuestions, 0);
+  const samplePath = MASTERY_PATHS.find((p) => p.id === pathId);
+  const cameFromSample = from === "sample" && samplePath;
 
   const handleUnlock = () => {
     // DEV ONLY — when RevenueCat is wired up, replace this with
@@ -47,6 +51,27 @@ export default function PaywallScreen() {
           </View>
         </View>
 
+        {cameFromSample && (
+          <View
+            style={{
+              backgroundColor: "rgba(245,158,11,0.08)",
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "rgba(245,158,11,0.25)",
+              padding: 12,
+              marginBottom: 16,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#fbbf24", fontSize: 13, fontWeight: "700" }}>
+              {samplePath!.icon} Preview complete — {samplePath!.name}
+            </Text>
+            <Text style={{ color: "#a1a1aa", fontSize: 12, marginTop: 4, textAlign: "center" }}>
+              {samplePath!.totalQuestions - 5}+ more questions in this path alone.
+            </Text>
+          </View>
+        )}
+
         <Text
           style={{
             color: "#f4f4f5",
@@ -56,7 +81,7 @@ export default function PaywallScreen() {
             marginBottom: 8,
           }}
         >
-          Go Premium
+          {cameFromSample ? "Ready for the full path?" : "Go Premium"}
         </Text>
         <Text
           style={{
@@ -143,8 +168,9 @@ export default function PaywallScreen() {
         {/* Restore + dev toggle */}
         <View style={{ flexDirection: "row", justifyContent: "center", gap: 20, marginTop: 16 }}>
           <Pressable
-            onPress={() => {
-              // TODO: Purchases.restorePurchases() — required by Apple
+            onPress={async () => {
+              const info = await restorePurchases();
+              if (info.hasPremium) setPremium(true);
             }}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >

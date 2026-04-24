@@ -44,7 +44,9 @@ interface GamificationContextType {
     wasCorrect: boolean,
     wasHeresy: boolean,
     sessionStreak: number,
-    questionId?: number
+    questionId?: number,
+    /** If true, a wrong answer doesn't cost a heart (used in sample mode). */
+    skipHearts?: boolean
   ) => void;
   /** Daily challenge answer (2.5× XP) */
   recordDailyAnswer: (
@@ -150,7 +152,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       wasCorrect: boolean,
       wasHeresy: boolean,
       sessionStreak: number,
-      questionId?: number
+      questionId?: number,
+      skipHearts?: boolean
     ) => {
       setData((prev) => {
         // Check for daily hearts reset first
@@ -169,8 +172,9 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           updated = xpResult.data;
           xpGains = xpResult.xpGains;
         } else {
-          // Wrong answer: 0 XP, lose a heart (unless premium), still count as answered
-          const newHearts = premiumRef.current
+          // Wrong answer: 0 XP, lose a heart (unless premium or sample mode),
+          // still count as answered
+          const newHearts = premiumRef.current || skipHearts
             ? updated.hearts
             : loseHeart(updated.hearts);
           updated = {

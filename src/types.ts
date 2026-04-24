@@ -40,6 +40,11 @@ export interface GameState {
   selectedHeresy: HeresyName | null;
   /** Whether the player answered correctly. null = not yet judged. */
   isCorrect: boolean | null;
+  /**
+   * When set, the quiz is running as a 5-question free preview of a locked
+   * mastery path. Hearts don't decrement and the app paywalls after Q5.
+   */
+  samplePathId: string | null;
 }
 
 // ─── Context interface ────────────────────────────────────────────────────────
@@ -53,7 +58,14 @@ export interface GameContextType {
 // ─── Reducer actions ──────────────────────────────────────────────────────────
 
 export type GameAction =
-  | { type: "START_GAME"; accuracy?: number; totalAnswered?: number; filterQuestionIds?: number[] }
+  | {
+      type: "START_GAME";
+      accuracy?: number;
+      totalAnswered?: number;
+      filterQuestionIds?: number[];
+      /** If set, starts a 5-question sample preview of a locked mastery path. */
+      samplePathId?: string | null;
+    }
   | { type: "ANSWER_TRUTH" }
   | { type: "ANSWER_HERESY" }
   | { type: "SELECT_HERESY"; heresy: HeresyName }

@@ -1,15 +1,23 @@
 import "../global.css";
 
+import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GameProvider } from "../src/context";
 import { GamificationProvider } from "../src/gamification/context";
 import { PremiumProvider } from "../src/premium";
+import { initRevenueCat } from "../src/revenuecat";
 import { LevelUpModal } from "../components/LevelUpModal";
 import { BadgeUnlockModal } from "../components/BadgeUnlockModal";
 
 export default function RootLayout() {
+  // Fire-and-forget: initializes the RevenueCat scaffold (no-op until
+  // `react-native-purchases` is installed and configured).
+  useEffect(() => {
+    initRevenueCat().catch(() => {});
+  }, []);
+
   return (
     <SafeAreaProvider>
       <PremiumProvider>

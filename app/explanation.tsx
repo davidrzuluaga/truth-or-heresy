@@ -11,9 +11,12 @@ import {
   CheckCircle,
   XCircle,
   ChevronRight,
+  Crown,
 } from "lucide-react-native";
 import { useGame } from "../src/context";
 import { useGamification } from "../src/gamification/context";
+import { usePremium } from "../src/premium";
+import { getMasteryPathForQuestion } from "../src/gamification/mastery";
 import { XPNotificationLayer } from "../components/XPNotification";
 import { LevelProgress } from "../components/LevelProgress";
 import { HeartsDisplay } from "../components/HeartsDisplay";
@@ -23,6 +26,18 @@ import { getQuestionDifficulty, DIFFICULTY_CONFIG } from "../src/difficulty";
 export default function ExplanationScreen() {
   const { state, dispatch, currentQuestion } = useGame();
   const { recordAnswer, data: gData, hearts } = useGamification();
+  const { isPremium } = usePremium();
+
+  // Upsell: if this question belongs to a locked path (and we're not already
+  // in sample mode), show a subtle banner pointing to the paywall.
+  const questionPath = currentQuestion
+    ? getMasteryPathForQuestion(currentQuestion.id)
+    : null;
+  const showLockedPathUpsell =
+    !isPremium &&
+    !state.samplePathId &&
+    questionPath !== null &&
+    questionPath.isFree !== true;
 
   const recorded = useRef(false);
 
@@ -38,7 +53,7 @@ export default function ExplanationScreen() {
       const wasCorrect = state.isCorrect;
       const wasHeresy =
         state.userChoice === "heresy" && wasCorrect && !currentQuestion.isTruth;
-      recordAnswer(wasCorrect, wasHeresy, state.score.streak, currentQuestion.id);
+      recordAnswer(wasCorrect, wasHeresy, state.score.streak, currentQuestion.id, !!state.samplePathId);
 
       // Sound feedback
       if (wasCorrect) {
@@ -193,6 +208,47 @@ export default function ExplanationScreen() {
             {q?.explanation}
           </Text>
         </View>
+
+        {/* ── Locked path upsell ─────────────────────────────────────────── */}
+        {showLockedPathUpsell && questionPath && (
+          <Pressable
+            onPress={() => router.push("/paywall" as any)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.85 : 1,
+              backgroundColor: "rgba(245,158,11,0.08)",
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: "rgba(245,158,11,0.25)",
+              padding: 14,
+              marginBottom: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+            })}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(245,158,11,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Crown size={18} color="#f59e0b" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "#fbbf24", fontSize: 13, fontWeight: "700" }}>
+                {questionPath.icon} From {questionPath.name}
+              </Text>
+              <Text style={{ color: "#a1a1aa", fontSize: 11, marginTop: 2 }}>
+                Unlock this path and 10 more with Premium.
+              </Text>
+            </View>
+            <ChevronRight size={18} color="#a1a1aa" />
+          </Pressable>
+        )}
 
         {/* ── Score snapshot + XP bar ────────────────────────────────────── */}
         <View

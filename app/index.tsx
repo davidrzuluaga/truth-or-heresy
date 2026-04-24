@@ -13,6 +13,7 @@ import {
 } from "lucide-react-native";
 import { useGame } from "../src/context";
 import { useGamification } from "../src/gamification/context";
+import { usePremium } from "../src/premium";
 import { StreakCounter } from "../components/StreakCounter";
 import { LevelProgress } from "../components/LevelProgress";
 import { HeartsDisplay } from "../components/HeartsDisplay";
@@ -23,10 +24,28 @@ import {
   formatHeartCountdown,
 } from "../src/gamification/hearts";
 
+const TEASER_THRESHOLD = 10; // show after user has answered this many questions
+
 export default function HomeScreen() {
   const { dispatch } = useGame();
   const { data, dueReviewCount, isDailyCompleted, hearts } = useGamification();
+  const { isPremium, teaserShown, markTeaserShown, loading: premiumLoading } =
+    usePremium();
   const level = getLevelFromXP(data.totalXP);
+
+  // First-launch teaser: once the user has tried ~10 questions, show the
+  // paywall once. After that, only triggered via explicit upsell surfaces.
+  useEffect(() => {
+    if (
+      !premiumLoading &&
+      !isPremium &&
+      !teaserShown &&
+      data.totalAnswered >= TEASER_THRESHOLD
+    ) {
+      markTeaserShown();
+      router.push("/paywall" as any);
+    }
+  }, [premiumLoading, isPremium, teaserShown, data.totalAnswered, markTeaserShown]);
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
   const [heartCountdown, setHeartCountdown] = useState(
     formatHeartCountdown(secondsUntilHeartReset(data.lastHeartReset))

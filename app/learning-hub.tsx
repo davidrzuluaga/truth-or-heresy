@@ -31,6 +31,27 @@ export default function LearningHubScreen() {
 
   const freePaths = MASTERY_PATHS.filter((p) => p.isFree);
   const paidPaths = MASTERY_PATHS.filter((p) => !p.isFree);
+
+  /** Free users tapping a locked card → start a 5-question sample preview. */
+  const handleSamplePath = useCallback(
+    (path: (typeof MASTERY_PATHS)[number]) => {
+      const ids: number[] = [];
+      for (let i = path.questionRange[0]; i <= path.questionRange[1]; i++) {
+        ids.push(i);
+      }
+      const acc =
+        data.totalAnswered > 0 ? data.totalCorrect / data.totalAnswered : 0;
+      dispatch({
+        type: "START_GAME",
+        accuracy: acc,
+        totalAnswered: data.totalAnswered,
+        filterQuestionIds: ids,
+        samplePathId: path.id,
+      });
+      router.push("/quiz");
+    },
+    [data.totalAnswered, data.totalCorrect, dispatch],
+  );
   const [countdown, setCountdown] = useState(formatCountdown(secondsUntilReset()));
 
   useEffect(() => {
@@ -286,15 +307,29 @@ export default function LearningHubScreen() {
           </Pressable>
         )}
 
-        {/* Premium (or locked) paths */}
-        {paidPaths.map((path) => (
-          <MasteryCard
-            key={path.id}
-            path={path}
-            progress={data.masteryProgress[path.id]}
-            locked={!isPremium}
-          />
-        ))}
+        {/* Premium (or locked) paths.
+            Free users can tap a locked card to play a 5-question preview. */}
+        {paidPaths.map((path) =>
+          isPremium ? (
+            <MasteryCard
+              key={path.id}
+              path={path}
+              progress={data.masteryProgress[path.id]}
+            />
+          ) : (
+            <Pressable
+              key={path.id}
+              onPress={() => handleSamplePath(path)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <MasteryCard
+                path={path}
+                progress={data.masteryProgress[path.id]}
+                locked
+              />
+            </Pressable>
+          ),
+        )}
 
         {/* ── Badges ───────────────────────────────────────────── */}
         <View style={[styles.card, { padding: 18, marginTop: 12, marginBottom: 16 }]}>

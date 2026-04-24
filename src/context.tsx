@@ -41,6 +41,7 @@ function makeInitialState(): GameState {
     userChoice: null,
     selectedHeresy: null,
     isCorrect: null,
+    samplePathId: null,
   };
 }
 
@@ -65,6 +66,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         userChoice: null,
         selectedHeresy: null,
         isCorrect: null,
+        samplePathId: action.samplePathId ?? null,
       };
     }
 

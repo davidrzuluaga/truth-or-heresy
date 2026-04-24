@@ -22,6 +22,23 @@ export default function QuizScreen() {
     }
   }, [hearts]);
 
+  // Sample mode: after the 5-question preview, bounce to paywall.
+  // Only fire when we're back on the quiz screen post-explanation
+  // (userChoice === null), so the user actually sees all 5 explanations.
+  const SAMPLE_LIMIT = 5;
+  useEffect(() => {
+    if (
+      state.samplePathId &&
+      state.score.attempted >= SAMPLE_LIMIT &&
+      state.userChoice === null
+    ) {
+      router.replace({
+        pathname: "/paywall",
+        params: { from: "sample", pathId: state.samplePathId },
+      } as any);
+    }
+  }, [state.samplePathId, state.score.attempted, state.userChoice]);
+
   if (!currentQuestion) return null;
 
   const handleTruth = () => {
@@ -77,6 +94,32 @@ export default function QuizScreen() {
           ),
         }}
       />
+
+      {/* Sample-mode preview banner */}
+      {state.samplePathId && (
+        <View
+          style={{
+            marginHorizontal: 20,
+            marginTop: 8,
+            paddingVertical: 8,
+            paddingHorizontal: 14,
+            borderRadius: 12,
+            backgroundColor: "rgba(245,158,11,0.1)",
+            borderWidth: 1,
+            borderColor: "rgba(245,158,11,0.25)",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={{ color: "#fbbf24", fontSize: 12, fontWeight: "700" }}>
+            🔒 Premium Preview
+          </Text>
+          <Text style={{ color: "#fbbf24", fontSize: 12, fontWeight: "700" }}>
+            {state.score.attempted}/{SAMPLE_LIMIT}
+          </Text>
+        </View>
+      )}
 
       {/* Hearts + Score strip */}
       <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingTop: 6 }}>
