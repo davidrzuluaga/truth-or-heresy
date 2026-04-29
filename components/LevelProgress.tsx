@@ -31,7 +31,7 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
   const isLarge = size === "large";
 
   return (
-    <View style={{ alignItems: isLarge ? "center" : "stretch" }}>
+    <View style={{ alignSelf: "stretch", alignItems: "stretch" }}>
       {isLarge && (
         <>
           <View
@@ -44,6 +44,7 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
               borderColor: "rgba(245,158,11,0.35)",
               justifyContent: "center",
               alignItems: "center",
+              alignSelf: "center",
               marginBottom: 12,
             }}
           >
@@ -63,6 +64,7 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
               fontSize: 13,
               fontWeight: "600",
               marginBottom: 4,
+              textAlign: "center",
             }}
           >
             Level {level}
@@ -72,6 +74,7 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
               color: "#71717a",
               fontSize: 12,
               marginBottom: 12,
+              textAlign: "center",
             }}
           >
             {totalXP.toLocaleString()} total XP
@@ -79,10 +82,10 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
         </>
       )}
 
-      {/* Progress bar */}
+      {/* Progress bar — fluid width, no fixed 200px overflow */}
       <View
         style={{
-          width: isLarge ? 200 : "100%",
+          width: "100%",
           height: isLarge ? 8 : 4,
           borderRadius: 4,
           backgroundColor: "#27272a",
@@ -108,15 +111,15 @@ export function LevelProgress({ totalXP, size = "small" }: LevelProgressProps) {
           flexDirection: "row",
           justifyContent: "space-between",
           marginTop: 4,
-          width: isLarge ? 200 : "100%",
+          width: "100%",
         }}
       >
-        <Text style={{ color: "#71717a", fontSize: 10 }}>
-          {isLarge ? `${xpInLevel} XP` : `Lvl ${level}`}
+        <Text style={{ color: "#71717a", fontSize: 10 }} numberOfLines={1}>
+          {isLarge ? `${xpInLevel}/${xpNeeded} XP` : `Lvl ${level}`}
         </Text>
-        <Text style={{ color: "#71717a", fontSize: 10 }}>
+        <Text style={{ color: "#71717a", fontSize: 10 }} numberOfLines={1}>
           {isLarge
-            ? `${xpNeeded - xpInLevel} to next`
+            ? `→ Lvl ${level + 1}`
             : `${xpInLevel}/${xpNeeded}`}
         </Text>
       </View>
